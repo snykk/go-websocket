@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>WebSocket Client</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                padding: 20px;
+            }
+            #messages {
+                margin-top: 20px;
+            }
+            #messages p {
+                padding: 5px;
+                border-bottom: 1px solid #ddd;
+            }
+            #messageInput {
+                width: 80%;
+                padding: 10px;
+            }
+            #sendButton {
+                padding: 10px 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Advanced WebSocket Client</h1>
+        <input id="messageInput" type="text" placeholder="Enter your message" />
+        <button id="sendButton">Send</button>
+
+        <h3>Received Messages:</h3>
+        <div id="messages"></div>
+
+        <script>
+            let socket;
+            const messagesDiv = document.getElementById("messages");
+            const messageInput = document.getElementById("messageInput");
+            const sendButton = document.getElementById("sendButton");
+
+            // Function to initialize the WebSocket connection
+            function initWebSocket() {
+                socket = new WebSocket("ws://localhost:8080/ws");
+
+                socket.onopen = () => {
+                    console.log("Connected to the WebSocket server.");
+                    displayMessage("Connected to the server.");
+                };
+
+                socket.onmessage = (event) => {
+                    console.log("Message received from server:", event.data);
+                    displayMessage("Server: " + event.data);
+                };
+
+                socket.onclose = () => {
+                    console.log("WebSocket connection closed.");
+                    displayMessage("Disconnected from server.");
+                };
+
+                socket.onerror = (error) => {
+                    console.error("WebSocket error:", error);
+                    displayMessage("Error occurred: " + error.message);
+                };
+            }
+
+            // Function to send a message to the WebSocket server
+            sendButton.onclick = () => {
+                const message = messageInput.value.trim();
+                if (message) {
+                    socket.send(message);
+                    console.log("Sent message:", message);
+                    displayMessage("You: " + message);
+                    messageInput.value = ""; // Clear the input field
+                }
+            };
+
+            // Function to display messages in the UI
+            function displayMessage(message) {
+                const p = document.createElement("p");
+                p.textContent = message;
+                messagesDiv.appendChild(p);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto scroll to the bottom
+            }
+
+            // Initialize WebSocket on page load
+            window.onload = initWebSocket;
+        </script>
+    </body>
+</html>
